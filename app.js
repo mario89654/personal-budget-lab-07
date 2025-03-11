@@ -1,136 +1,107 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const transacciones = [
-        { transaccion: "Salario", tipoDeTransaccion: "Ingreso", monto: 2000 },
-        { transaccion: "Alquiler", tipoDeTransaccion: "Egreso", monto: 800 },
-        { transaccion: "Mercado", tipoDeTransaccion: "Egreso", monto: 400 },
-        { transaccion: "Cena", tipoDeTransaccion: "Egreso", monto: 50 },
-        { transaccion: "Suscripción", tipoDeTransaccion: "Egreso", monto: 120 }
-    ];
+// Definimos la función constructora para un Movimiento
+function Movimiento(tipo, monto, descripcion) {
+    if (!tipo || (tipo !== "Ingreso" && tipo !== "Egreso")) {
+        throw new Error("Tipo de transacción inválido");
+    }
+    if (isNaN(monto) || monto <= 0) {
+        throw new Error("El monto debe ser un número positivo");
+    }
+    if (!descripcion.trim()) {
+        throw new Error("La descripción no puede estar vacía");
+    }
 
-    const form = document.getElementById("transactionForm");
-    const transaccionInput = document.getElementById("transaccion");
-    const tipoInput = document.getElementById("tipoDeTransaccion");
-    const montoInput = document.getElementById("monto");
-    const errorMessage = document.getElementById("errorMessage");
-    const transaccionesList = document.getElementById("transaccionesList");
+    this.tipo = tipo;
+    this.monto = monto;
+    this.descripcion = descripcion;
+    this.fecha = new Date();
+}
 
-    const searchForm = document.getElementById("searchForm");
-    const searchInput = document.getElementById("searchInput");
+// Método para renderizar en el DOM
+Movimiento.prototype.render = function () {
+    const li = document.createElement("li");
+    li.textContent = `${this.fecha.toLocaleDateString()} - ${this.descripcion} - ${this.tipo}: $${this.monto.toFixed(2)}`;
+    document.getElementById("transaccionesList").appendChild(li);
+};
+
+// Definimos la función constructora para manejar el presupuesto
+function Presupuesto() {
+    this.movimientos = [];
+}
+
+// Método para agregar una nueva transacción
+Presupuesto.prototype.agregarMovimiento = function(tipo, monto, descripcion) {
+    try {
+        const nuevoMovimiento = new Movimiento(tipo, monto, descripcion);
+        this.movimientos.push(nuevoMovimiento);
+        nuevoMovimiento.render();
+        this.mostrarResumen();
+    } catch (error) {
+        console.error("❌", error.message);
+        document.getElementById("errorMessage").textContent = `❌ ${error.message}`;
+    }
+};
+
+// Método para calcular el saldo total
+Presupuesto.prototype.calcularTotalSaldo = function() {
+    let totalIngresos = 0;
+    let totalEgresos = 0;
+
+    for (const movimiento of this.movimientos) {
+        if (movimiento.tipo === "Ingreso") {
+            totalIngresos += movimiento.monto;
+        } else {
+            totalEgresos += movimiento.monto;
+        }
+    }
+
+    return { totalIngresos, totalEgresos, saldoTotal: totalIngresos - totalEgresos };
+};
+
+// Método para renderizar el resumen
+Presupuesto.prototype.mostrarResumen = function() {
+    const { totalIngresos, totalEgresos, saldoTotal } = this.calcularTotalSaldo();
+
+    let resumenHTML = `
+        <h3> Resumen General</h3>
+        <p>🔹 Movimientos registrados: ${this.movimientos.length}</p>
+        <p>💰 Total de Ingresos: $${totalIngresos.toFixed(2)}</p>
+        <p>💸 Total de Egresos: $${totalEgresos.toFixed(2)}</p>
+        <p>💵 Saldo Total: $${saldoTotal.toFixed(2)}</p>
+    `;
+
+    resumenHTML += saldoTotal < 0
+        ? `<p style="color:red;">⚠️ ¡Cuidado! Estás en saldo negativo.</p>`
+        : `<p style="color:green;">✅ ¡Bien! Tienes un saldo positivo.</p>`;
+
+    document.getElementById("resumen").innerHTML = resumenHTML;
+};
+
+// Instanciamos el presupuesto
+const presupuesto = new Presupuesto();
+
+// Manejo del formulario de transacciones
+document.getElementById("transactionForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const descripcion = document.getElementById("transaccion").value.trim();
+    const tipo = document.getElementById("tipoDeTransaccion").value;
+    const monto = parseFloat(document.getElementById("monto").value);
+
+    presupuesto.agregarMovimiento(tipo, monto, descripcion);
+    
+    document.getElementById("transaccion").value = "";
+    document.getElementById("monto").value = "";
+});
+
+// Manejo del formulario de búsqueda
+document.getElementById("searchForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const searchInput = document.getElementById("searchInput").value.trim();
     const searchResult = document.getElementById("searchResult");
-
-    function calcularTotalSaldo() {
-        let totalIngresos = 0;
-        let totalEgresos = 0;
-
-        for (const transaccion of transacciones) {
-            if (transaccion.tipoDeTransaccion === "Ingreso") {
-                totalIngresos += transaccion.monto;
-            } else {
-                totalEgresos += transaccion.monto;
-            }
-        }
-
-        return { totalIngresos, totalEgresos, saldoTotal: totalIngresos - totalEgresos };
-    }
-
-    function mostrarResumen() {
-        const { totalIngresos, totalEgresos, saldoTotal } = calcularTotalSaldo();
-
-        let resumenHTML = `
-            <h3>📊 Resumen General</h3>
-            <p>🔹 Movimientos registrados: ${transacciones.length}</p>
-            <p>💰 Total de Ingresos: $${totalIngresos.toFixed(2)}</p>
-            <p>💸 Total de Egresos: $${totalEgresos.toFixed(2)}</p>
-            <p>💵 Saldo Total: $${saldoTotal.toFixed(2)}</p>
-        `;
-
-        if (saldoTotal < 0) {
-            resumenHTML += `<p style="color:red;">⚠️ ¡Cuidado! Estás en saldo negativo.</p>`;
-        } else {
-            resumenHTML += `<p style="color:green;">✅ ¡Bien! Tienes un saldo positivo.</p>`;
-        }
-
-        document.getElementById("resumen").innerHTML = resumenHTML;
-    }
-
-    function obtenerNombresTransacciones() {
-        return transacciones.map(transaccion => transaccion.transaccion);
-    }
-
-    function mostrarNombresEnConsola() {
-        const nombres = obtenerNombresTransacciones();
-        console.log("📌 Lista de nombres de transacciones:", nombres);
-    }
-
-    function obtenerEgresosMayoresA100() {
-        return transacciones.filter(transaccion =>
-            transaccion.tipoDeTransaccion === "Egreso" && transaccion.monto > 100
-        );
-    }
-
-    function mostrarEgresosMayoresA100() {
-        const egresosFiltrados = obtenerEgresosMayoresA100().map(transaccion => transaccion.transaccion);
-        console.log("🔍 Gastos mayores a $100:", egresosFiltrados);
-    }
-
-    function buscarTransaccionPorNombre(nombre) {
-        return transacciones.find(transaccion => transaccion.transaccion.toLowerCase() === nombre.toLowerCase());
-    }
-
-    function mostrarBusquedaEnPantalla(nombre) {
-        const resultado = buscarTransaccionPorNombre(nombre);
-        if (resultado) {
-            searchResult.innerHTML = `✅ Movimiento encontrado: <strong>${resultado.transaccion}</strong> - ${resultado.tipoDeTransaccion}: $${resultado.monto}`;
-            console.log(`✅ Movimiento encontrado:`, resultado);
-        } else {
-            searchResult.innerHTML = `❌ No se encontró un movimiento con el nombre "<strong>${nombre}</strong>".`;
-            console.log(`❌ No se encontró un movimiento con el nombre "${nombre}".`);
-        }
-    }
-
-    function actualizarListaTransacciones() {
-        transaccionesList.innerHTML = "";
-        transacciones.forEach(({ transaccion, tipoDeTransaccion, monto }) => {
-            const li = document.createElement("li");
-            li.textContent = `${transaccion} - ${tipoDeTransaccion}: $${monto}`;
-            transaccionesList.appendChild(li);
-        });
-
-        mostrarResumen();
-        mostrarNombresEnConsola();
-        mostrarEgresosMayoresA100();
-    }
-
-    form.addEventListener("submit", (event) => {
-        event.preventDefault();
-
-        const transaccion = transaccionInput.value.trim();
-        const tipoDeTransaccion = tipoInput.value;
-        const monto = parseFloat(montoInput.value);
-
-        if (!transaccion || isNaN(monto) || monto <= 0) {
-            errorMessage.textContent = "❌ Error: Ingrese datos válidos.";
-            return;
-        }
-
-        errorMessage.textContent = "";
-        transacciones.push({ transaccion, tipoDeTransaccion, monto });
-
-        transaccionInput.value = "";
-        montoInput.value = "";
-
-        actualizarListaTransacciones();
-    });
-
-    searchForm.addEventListener("submit", (event) => {
-        event.preventDefault();
-        const nombreBuscado = searchInput.value.trim();
-        if (nombreBuscado) {
-            mostrarBusquedaEnPantalla(nombreBuscado);
-        } else {
-            searchResult.innerHTML = "❌ Ingrese un nombre para buscar.";
-        }
-    });
-
-    actualizarListaTransacciones();
+    
+    const resultado = presupuesto.movimientos.find(movimiento => movimiento.descripcion.toLowerCase() === searchInput.toLowerCase());
+    
+    searchResult.innerHTML = resultado
+        ? `✅ Movimiento encontrado: <strong>${resultado.descripcion}</strong> - ${resultado.tipo}: $${resultado.monto.toFixed(2)}`
+        : `❌ No se encontró un movimiento con el nombre "<strong>${searchInput}</strong>".`;
 });

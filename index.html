@@ -1,44 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Budget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h2, h3 {
+            color: #333;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #transaccionesList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #transaccionesList li {
+            background: #fff;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 5px solid #28a745;
+        }
+
+        #resumen {
+            background: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
 
     <h2>Personal Budget</h2>
 
-    <form id="transactionForm">
-        <label for="transaccion">Nombre de la Transacción:</label>
-        <input type="text" id="transaccion" required>
+    <fieldset>
+        <legend> Registrar Transacción</legend>
+        <form id="transactionForm">
+            <label for="transaccion">Nombre de la Transacción:</label>
+            <input type="text" id="transaccion" required>
 
-        <label for="tipoDeTransaccion">Tipo:</label>
-        <select id="tipoDeTransaccion">
-            <option value="Ingreso">Ingreso</option>
-            <option value="Egreso">Egreso</option>
-        </select>
+            <label for="tipoDeTransaccion">Tipo:</label>
+            <select id="tipoDeTransaccion">
+                <option value="Ingreso">Ingreso</option>
+                <option value="Egreso">Egreso</option>
+            </select>
 
-        <label for="monto">Monto:</label>
-        <input type="number" id="monto" required>
+            <label for="monto">Monto:</label>
+            <input type="number" id="monto" required>
 
-        <button type="submit">Agregar Transacción</button>
-    </form>
-    <h3>🔎 Buscar Movimiento</h3>
-    <form id="searchForm">
-        <input type="text" id="searchInput" placeholder="Ingrese el nombre del movimiento">
-        <button type="submit">Buscar</button>
-    </form>
-    <p id="searchResult"></p>
-    <p id="errorMessage"></p>
+            <button type="submit">Agregar Transacción</button>
+            <button type="reset" style="background-color: #dc3545;">Limpiar</button>
+        </form>
+    </fieldset>
 
-    <h3>Lista de Transacciones</h3>
+    <fieldset>
+        <legend> Buscar Movimiento</legend>
+        <form id="searchForm">
+            <input type="text" id="searchInput" placeholder="Ingrese el nombre del movimiento">
+            <button type="submit">Buscar</button>
+        </form>
+        <p id="searchResult"></p>
+    </fieldset>
+
+    <p id="errorMessage" class="error-message"></p>
+
+    <h3> Lista de Transacciones</h3>
     <ul id="transaccionesList"></ul>
+
     <div id="resumen"></div>
 
-    <script src="modifybudget.js"></script>
+    <script src="app.js"></script>
 </body>
 
 </html>
