@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Budget</title>
+</head>
+
+<body>
+
+    <h2>Personal Budget</h2>
+
+    <form id="transactionForm">
+        <label for="transaccion">Nombre de la Transacción:</label>
+        <input type="text" id="transaccion" required>
+
+        <label for="tipoDeTransaccion">Tipo:</label>
+        <select id="tipoDeTransaccion">
+            <option value="Ingreso">Ingreso</option>
+            <option value="Egreso">Egreso</option>
+        </select>
+
+        <label for="monto">Monto:</label>
+        <input type="number" id="monto" required>
+
+        <button type="submit">Agregar Transacción</button>
+    </form>
+    <h3>🔎 Buscar Movimiento</h3>
+    <form id="searchForm">
+        <input type="text" id="searchInput" placeholder="Ingrese el nombre del movimiento">
+        <button type="submit">Buscar</button>
+    </form>
+    <p id="searchResult"></p>
+    <p id="errorMessage"></p>
+
+    <h3>Lista de Transacciones</h3>
+    <ul id="transaccionesList"></ul>
+    <div id="resumen"></div>
+
+    <script src="modifybudget.js"></script>
+</body>
+
+</html>
